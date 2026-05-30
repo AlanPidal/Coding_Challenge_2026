@@ -8,9 +8,8 @@ class WalletForm(forms.ModelForm):
     """
     class Meta:
         model = Wallet
-        fields = ["exchange_name", "address"]
+        fields = ["exchange_name", "address", "cryptocurrency", "amount"]
         widgets = {
-            # Widgets con clases CSS para que se vean bien con Tailwind CDN
             "exchange_name": forms.TextInput(attrs={
                 "class": "border rounded px-2 py-1 w-full",
                 "placeholder": "Nombre del exchange (ej. Binance)"
@@ -19,8 +18,18 @@ class WalletForm(forms.ModelForm):
                 "class": "border rounded px-2 py-1 w-full",
                 "placeholder": "Dirección o etiqueta de la wallet (opcional)"
             }),
+            "cryptocurrency": forms.Select(attrs={
+                "class": "border rounded px-2 py-1 w-full"
+            }),
+            "amount": forms.NumberInput(attrs={
+                "step": "0.00000001",
+                "class": "border rounded px-2 py-1 w-full",
+                "placeholder": "Cantidad (ej. 0.001)"
+            }),
         }
         labels = {
             "exchange_name": "Exchange",
             "address": "Address",
+            "cryptocurrency": "Cryptocurrency",
+            "amount": "Amount",
         }

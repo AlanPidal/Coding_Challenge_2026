@@ -49,12 +49,20 @@
               <li class="flex items-center justify-between border rounded p-3">
                 <div>
                   <div class="font-medium">{{ item.wallet.exchange_name }}</div>
-                  <div class="text-sm text-gray-500">{{ item.wallet.address }}</div>
-                </div>
-                <div class="text-right">
-                  <div class="font-semibold">${{ item.balance }}</div>
-                  <div class="text-xs text-gray-500">{{ item.currency }}</div>
-                </div>
+                        <div class="text-sm text-gray-500">{{ item.wallet.address }}</div>
+                        <div class="text-xs text-gray-500">Cantidad: {{ item.amount }} {{ item.crypto }}</div>
+                      </div>
+                      <div class="text-right">
+                        <div class="font-semibold">
+                          {% if item.balance != "No disponible" %}
+                            ${{ item.balance }} USD
+                          {% else %}
+                            No disponible
+                          {% endif %}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                          {% if item.price_per_unit %}Precio: ${{ item.price_per_unit }} / {{ item.crypto }}{% endif %}
+                        </div>
                 <!-- Formulario de eliminación: usa POST y CSRF -->
                 <form method="post" action="{% url 'portfolio:delete_wallet' item.wallet.id %}"
                       onsubmit="return confirmDeleteWallet('{{ item.wallet.exchange_name|escapejs }}');">
@@ -75,20 +83,48 @@
       <!-- Formulario para agregar wallet -->
       <div class="bg-white p-6 rounded shadow">
         <h3 class="font-semibold mb-3">Agregar wallet</h3>
+        
         <form method="post" class="space-y-3">
           {% csrf_token %}
+
+          <!-- Mostrar errores no campo -->
+          {% if form.non_field_errors %}
+            <div class="text-red-600 text-sm">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
           <div>
             {{ form.exchange_name.label_tag }}
             {{ form.exchange_name }}
+            {{ form.exchange_name.errors }}
           </div>
+
           <div>
             {{ form.address.label_tag }}
             {{ form.address }}
+            {{ form.address.errors }}
           </div>
+
+          <div>
+            {{ form.cryptocurrency.label_tag }}
+            {{ form.cryptocurrency }}
+            {{ form.cryptocurrency.errors }}
+          </div>
+
+          <div>
+            {{ form.amount.label_tag }}
+            {{ form.amount }}
+            {{ form.amount.errors }}
+          </div>
+
           <div>
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Agregar</button>
           </div>
         </form>
+
+
+
       </div>
     </section>
 

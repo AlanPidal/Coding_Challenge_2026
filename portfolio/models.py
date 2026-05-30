@@ -1,8 +1,17 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
 
 # Modelo que representa una wallet o cuenta en un exchange o dirección on-chain
 class Wallet(models.Model):
+    CRYPTO_CHOICES = [
+        ("BTC", "Bitcoin"),
+        ("ETH", "Ethereum"),
+        ("USDT", "Tether (USDT)"),
+        ("SOL", "Solana"),
+        ("BNB", "Binance Coin"),
+        ("DOGE", "Dogecoin"),
+    ]
     # Relación con el usuario propietario (User de Django)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wallets")
     # Nombre del exchange o etiqueta de la wallet (ej. "Binance", "Metamask")
@@ -12,6 +21,8 @@ class Wallet(models.Model):
     api_secret = models.CharField(max_length=255, blank=True, null=True)
     # Dirección on-chain o identificador de la wallet
     address = models.CharField(max_length=255, blank=True, null=True)
+    cryptocurrency = models.CharField(max_length=6, choices=CRYPTO_CHOICES, default="BTC")
+    amount = models.DecimalField(max_digits=24, decimal_places=8, default=Decimal("0"))
     # Fecha de creación automática
     created_at = models.DateTimeField(auto_now_add=True)
 
