@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard - Crypto Portfolio</title>
+  <!-- Tailwind CDN para estilos rápidos en desarrollo -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Contenedor principal -->
+  <div class="max-w-4xl mx-auto py-10">
+    <!-- Header con nombre y logout -->
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-semibold">Crypto Portfolio</h1>
+      <div class="space-x-3">
+        <!-- request.user proviene del contexto de Django -->
+        <span class="text-sm text-gray-600">Hola, {{ request.user.username }}</span>
+        <a href="{% url 'logout' %}" class="text-sm text-red-600">Cerrar sesión</a>
+      </div>
+    </header>
+
+    {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="p-3 rounded mb-2 {% if message.tags %}text-sm {% endif %} 
+                    {% if 'success' in message.tags %}bg-green-100 text-green-800{% elif 'error' in message.tags %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+    <!-- Sección de saldo total -->
+    <section class="bg-white p-6 rounded shadow mb-6">
+      <h2 class="text-lg font-medium mb-2">Saldo total</h2>
+      <!-- total_balance viene del contexto en la vista -->
+      <p class="text-3xl font-bold">${{ total_balance }}</p>
+    </section>
+
+    <!-- Grid: lista de wallets y formulario para agregar -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <!-- Lista de wallets -->
+      <div class="bg-white p-6 rounded shadow">
+        <h3 class="font-semibold mb-3">Tus wallets</h3>
+        {% if wallets %}
+          <ul class="space-y-3">
+            {% for item in wallets %}
+              <li class="flex items-center justify-between border rounded p-3">
+                <div>
+                  <div class="font-medium">{{ item.wallet.exchange_name }}</div>
+                  <div class="text-sm text-gray-500">{{ item.wallet.address }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-semibold">${{ item.balance }}</div>
+                  <div class="text-xs text-gray-500">{{ item.currency }}</div>
+                </div>
+                <!-- Formulario de eliminación: usa POST y CSRF -->
+                <form method="post" action="{% url 'portfolio:delete_wallet' item.wallet.id %}"
+                      onsubmit="return confirmDeleteWallet('{{ item.wallet.exchange_name|escapejs }}');">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
+                    Eliminar
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500">No tienes wallets registradas.</p>
+        {% endif %}
+      </div>
+
+      <!-- Formulario para agregar wallet -->
+      <div class="bg-white p-6 rounded shadow">
+        <h3 class="font-semibold mb-3">Agregar wallet</h3>
+        <form method="post" class="space-y-3">
+          {% csrf_token %}
+          <div>
+            {{ form.exchange_name.label_tag }}
+            {{ form.exchange_name }}
+          </div>
+          <div>
+            {{ form.address.label_tag }}
+            {{ form.address }}
+          </div>
+          <div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Agregar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <footer class="text-center text-sm text-gray-500">
+      <p>Prototipo: saldos de prueba, no provienen de APIs reales.</p>
+    </footer>
+  </div>
+  <script>
+  // Mensaje de confirmación personalizado. Devuelve true para enviar el formulario.
+  function confirmDeleteWallet(exchangeName) {
+    // Puedes personalizar el texto
+    return confirm("¿Eliminar la wallet '" + exchangeName + "'? Esta acción no se puede deshacer.");
+  }
+</script>
+</body>
+</html>

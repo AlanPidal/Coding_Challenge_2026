@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Registro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-md bg-white p-6 rounded shadow">
+    <h1 class="text-xl font-semibold mb-4">Crear cuenta</h1>
+    <!-- UserCreationForm se pasa desde register_view -->
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="mt-4">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Registrarme</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

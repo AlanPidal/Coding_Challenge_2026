@@ -1,0 +1,25 @@
+# Base de datos (no queremos viajar en el tiempo con datos, solo con código)
+db.sqlite3
+
+# Archivos compilados de Python (no son necesarios)
+__pycache__/
+*.pyc
+
+# Variables de entorno (tus secretos)
+.env
+*.env
+
+# Archivos de configuración local
+*.local.py
+
+# IDE
+.vscode/
+.idea/
+
+# Django
+*.log
+migrations/__pycache__/
+
+# Virtual environment (si usas uno)
+venv/
+env/
