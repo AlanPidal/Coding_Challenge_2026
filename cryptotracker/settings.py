@@ -99,7 +99,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
@@ -110,6 +109,44 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+# settings.py (añade o reemplaza las secciones correspondientes)
+
+# --- Cache (desarrollo: LocMem) ---
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-portfolio-cache",
+    }
+}
+
+# Si prefieres Redis en producción (instala django-redis):
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+#     }
+# }
+
+# --- Logging mínimo para ver hits/misses en consola ---
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        # logger usado en views.py
+        "portfolio": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        # logger por módulo
+        "": {"handlers": ["console"], "level": "INFO"},
+    },
+}
 
 
 # Static files (CSS, JavaScript, Images)

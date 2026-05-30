@@ -74,19 +74,22 @@
     </section>
 
       <!-- Contenedor centrado del gráfico (reemplaza el bloque anterior) -->
-  <div class="flex justify-center">
-    <div class="bg-white p-4 rounded card-shadow max-w-lg w-full">
-      <h4 class="text-sm font-medium mb-2 text-center">Distribución del portfolio</h4>
+    <div class="flex justify-center">
+      <div class="bg-white p-4 rounded card-shadow max-w-lg w-full">
+        <h4 class="text-sm font-medium mb-2 text-center">Distribución del portfolio</h4>
 
-      <!-- Contenedor relativo centrado con altura fija más grande -->
-      <div class="relative w-full h-72 flex items-center justify-center">
-        <!-- El canvas ocupa el 100% del contenedor, pero el contenedor está centrado -->
-        <canvas id="portfolioPieChart" class="w-full h-full max-w-md"></canvas>
+        <!-- Contenedor relativo centrado con altura fija más grande -->
+        <div class="relative w-full h-72 flex items-center justify-center">
+          <!-- El canvas ocupa el 100% del contenedor, pero el contenedor está centrado -->
+          <canvas id="portfolioPieChart" class="w-full h-full max-w-md"></canvas>
+        </div>
+
+        <div id="portfolio-legend" class="mt-3 text-sm"></div>
       </div>
-
-      <div id="portfolio-legend" class="mt-3 text-sm"></div>
     </div>
-  </div>
+    
+    <!-- JSON seguro inyectado por Django -->
+    {{ chart_data|json_script:"chart-data" }}
 
     <!-- Grid: wallets (cards) y formulario -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -209,10 +212,6 @@
         </div>
       </aside>
     </section>
-  <br><br>
-
-  <!-- JSON seguro inyectado por Django -->
-  {{ chart_data|json_script:"chart-data" }}
 
   <footer class="mt-10 text-center text-sm text-gray-500">
     <p>Precios basados en el día de hoy</p>

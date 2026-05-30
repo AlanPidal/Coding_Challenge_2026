@@ -16,7 +16,7 @@ class WalletForm(forms.ModelForm):
             }),
             "address": forms.TextInput(attrs={
                 "class": "border rounded px-2 py-1 w-full",
-                "placeholder": "Dirección o etiqueta de la wallet (opcional)"
+                "placeholder": "Dirección de la wallet (opcional)"
             }),
             "cryptocurrency": forms.Select(attrs={
                 "class": "border rounded px-2 py-1 w-full"

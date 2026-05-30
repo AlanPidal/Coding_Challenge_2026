@@ -1,6 +1,7 @@
 import requests
 import logging
 from decimal import Decimal, InvalidOperation
+from django.core.cache import cache
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -8,6 +9,8 @@ from .models import Wallet
 from .forms import WalletForm
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+
+logger = logging.getLogger(__name__)
 
 # Mapeo de códigos a IDs de CoinGecko (incluye BNB y DOGE)
 COINGECKO_IDS = {
@@ -18,6 +21,10 @@ COINGECKO_IDS = {
     "BNB": "binancecoin",
     "DOGE": "dogecoin",
 }
+
+# Tiempo de cache en segundos (ajusta a 30 si prefieres)
+PRICE_CACHE_TTL = 60
+PRICE_CACHE_KEY = "coingecko:prices:usd"  # clave global; puedes incluir ids si varía
 
 @login_required
 def dashboard(request):
@@ -40,30 +47,48 @@ def dashboard(request):
     else:
         form = WalletForm()
 
-    # Preparar lista de ids para CoinGecko
-    ids = ",".join(set(COINGECKO_IDS.values()))
-
-    # --- Consulta de precios desde CoinGecko ---
+    # Intentar leer precios desde cache
+    cached = cache.get(PRICE_CACHE_KEY)
     prices = {}
-    try:
-        response = requests.get(
-            "https://api.coingecko.com/api/v3/simple/price",
-            params={"ids": ids, "vs_currencies": "usd"},
-            timeout=10
-        )
-        response.raise_for_status()
-        data = response.json()
-        for code, cg_id in COINGECKO_IDS.items():
-            usd_val = data.get(cg_id, {}).get("usd")
-            try:
-                prices[code] = Decimal(str(usd_val)) if usd_val is not None else None
-            except (InvalidOperation, TypeError):
-                prices[code] = None
-    except Exception as e:
-        logging.error(f"Error al consultar CoinGecko: {e}")
-        for code in COINGECKO_IDS.keys():
-            prices[code] = None
-    
+
+    if cached:
+        # cached ya debe ser un dict con keys de COINGECKO_IDS invertidas a códigos (BTC, ETH, ...)
+        prices = cached
+        logger.debug("Precios: cache HIT")
+    else:
+        logger.debug("Precios: cache MISS — consultando CoinGecko")
+        # Preparar lista de ids para CoinGecko
+        ids = ",".join(set(COINGECKO_IDS.values()))
+        try:
+            response = requests.get(
+                "https://api.coingecko.com/api/v3/simple/price",
+                params={"ids": ids, "vs_currencies": "usd"},
+                timeout=10
+            )
+            response.raise_for_status()
+            data = response.json()
+            # Convertir a Decimal y mapear a códigos (BTC, ETH,...)
+            for code, cg_id in COINGECKO_IDS.items():
+                usd_val = data.get(cg_id, {}).get("usd")
+                try:
+                    prices[code] = Decimal(str(usd_val)) if usd_val is not None else None
+                except (InvalidOperation, TypeError):
+                    prices[code] = None
+            # Guardar en cache el diccionario de Decimals o None (UNA SOLA VEZ, fuera del loop)
+            cache.set(PRICE_CACHE_KEY, prices, PRICE_CACHE_TTL)
+            logger.debug("Precios guardados en cache por %s segundos", PRICE_CACHE_TTL)
+        except Exception as e:
+            logger.exception("Error al consultar CoinGecko: %s", e)
+            # Si hay cache vieja, úsala; si no, marcar precios como None
+            old = cache.get(PRICE_CACHE_KEY)
+            if old:
+                prices = old
+                logger.warning("CoinGecko falló: usando cache antigua")
+            else:
+                for code in COINGECKO_IDS.keys():
+                    prices[code] = None
+                logger.warning("CoinGecko falló y no hay cache: precios marcados como None")
+
     # Calcular balances usando cryptocurrency y amount
     wallets_qs = Wallet.objects.filter(user=request.user).order_by("-id")
     wallets_with_balance = []
