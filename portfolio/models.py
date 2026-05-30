@@ -11,6 +11,11 @@ class Wallet(models.Model):
         ("SOL", "Solana"),
         ("BNB", "Binance Coin"),
         ("DOGE", "Dogecoin"),
+        ("XRP", "XRP"),
+        ("ADA", "Cardano"),
+        ("POL", "POL (ex‑MATIC)"),
+        ("AVAX", "Avalanche"),
+        ("LTC", "Litecoin"),
     ]
     # Relación con el usuario propietario (User de Django)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wallets")

@@ -20,6 +20,11 @@ COINGECKO_IDS = {
     "SOL": "solana",
     "BNB": "binancecoin",
     "DOGE": "dogecoin",
+    "XRP": "ripple",
+    "ADA": "cardano",
+    "POL": "polygon-ecosystem-token",
+    "AVAX": "avalanche-2",
+    "LTC": "litecoin",
 }
 
 # Tiempo de cache en segundos (ajusta a 30 si prefieres)
@@ -135,6 +140,11 @@ def dashboard(request):
         "SOL": "#00ffa3",   # verde-azulado Solana
         "BNB": "#f3ba2f",   # amarillo BNB
         "DOGE": "#c2a633",  # dorado Doge
+        "XRP": "#346aa9",
+        "ADA": "#0033ad",
+        "POL": "#8247e5",
+        "AVAX": "#e84142",
+        "LTC": "#b8b8b8",
     }
 
     # Si total_balance es 0 o no hay datos, evitamos división por cero
