@@ -7,7 +7,7 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
+  
   <!-- Font Awesome CDN (para íconos) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pbVn6Ykq6Yq3Qm3k1q2Z6k1Q1q2Z6k1Q1q2Z6k1Q1q2Z6k1Q1q2Z6k1Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -72,6 +72,21 @@
         <div class="mt-2">Saldos mostrados en USD</div>
       </div>
     </section>
+
+      <!-- Contenedor centrado del gráfico (reemplaza el bloque anterior) -->
+  <div class="flex justify-center">
+    <div class="bg-white p-4 rounded card-shadow max-w-lg w-full">
+      <h4 class="text-sm font-medium mb-2 text-center">Distribución del portfolio</h4>
+
+      <!-- Contenedor relativo centrado con altura fija más grande -->
+      <div class="relative w-full h-72 flex items-center justify-center">
+        <!-- El canvas ocupa el 100% del contenedor, pero el contenedor está centrado -->
+        <canvas id="portfolioPieChart" class="w-full h-full max-w-md"></canvas>
+      </div>
+
+      <div id="portfolio-legend" class="mt-3 text-sm"></div>
+    </div>
+  </div>
 
     <!-- Grid: wallets (cards) y formulario -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -194,12 +209,17 @@
         </div>
       </aside>
     </section>
+  <br><br>
 
-    <footer class="mt-10 text-center text-sm text-gray-500">
-      <p>Prototipo: saldos calculados con precios públicos; no constituye asesoramiento financiero.</p>
-    </footer>
-  </div>
+  <!-- JSON seguro inyectado por Django -->
+  {{ chart_data|json_script:"chart-data" }}
 
+  <footer class="mt-10 text-center text-sm text-gray-500">
+    <p>Precios basados en el día de hoy</p>
+  </footer>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <script>
     function confirmDeleteWallet(exchangeName) {
       return confirm("¿Eliminar la wallet '" + exchangeName + "'? Esta acción no se puede deshacer.");
@@ -260,6 +280,37 @@
       }, 120); // 120ms suele ser suficiente; puedes aumentar si tu página carga lento
     });
   });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const raw = document.getElementById("chart-data").textContent;
+    let chartData = {};
+    try {
+      chartData = JSON.parse(raw);
+    } catch (e) {
+      chartData = { labels: [], values: [], colors: [] };
+    }
+
+    const ctx = document.getElementById("portfolioPieChart").getContext("2d");
+    new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: chartData.labels,
+        datasets: [{
+          data: chartData.values,
+          backgroundColor: chartData.colors,
+          borderColor: "#ffffff",
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { position: "bottom" }
+        }
+      }
+    });
+  });
+
   </script>
 </body>
 </html>

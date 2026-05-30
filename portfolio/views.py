@@ -68,8 +68,8 @@ def dashboard(request):
     wallets_qs = Wallet.objects.filter(user=request.user).order_by("-id")
     wallets_with_balance = []
     total_balance = Decimal("0")
-
-    test_amount = 0.001  # cantidad fija de prueba
+    # acumulador por crypto en USD
+    per_crypto_usd = {}
 
     for w in wallets_qs:
         price = prices.get(w.cryptocurrency)
@@ -82,8 +82,11 @@ def dashboard(request):
             balance_usd = (amount * price).quantize(Decimal("0.01"))
             total_balance += balance_usd
             balance_display = f"{balance_usd}"
+            # acumular por crypto
+            per_crypto_usd[w.cryptocurrency] = per_crypto_usd.get(w.cryptocurrency, Decimal("0")) + balance_usd
         else:
             balance_display = "No disponible"
+            # no acumulamos si no hay precio
 
         wallets_with_balance.append({
             "wallet": w,
@@ -94,10 +97,49 @@ def dashboard(request):
             "price_per_unit": str(price) if price is not None else None,
         })
 
+    # --- Preparar datos para el gráfico de pastel (porcentajes) ---
+    chart_labels = []
+    chart_values = []
+    chart_colors = []
+
+    # Paleta simple por crypto (puedes ajustar colores)
+    COLOR_MAP = {
+        "BTC": "#f2a900",   # naranja Bitcoin
+        "ETH": "#3c3c3d",   # gris Ethereum
+        "USDT": "#26a17b",  # verde Tether
+        "SOL": "#00ffa3",   # verde-azulado Solana
+        "BNB": "#f3ba2f",   # amarillo BNB
+        "DOGE": "#c2a633",  # dorado Doge
+    }
+
+    # Si total_balance es 0 o no hay datos, evitamos división por cero
+    if total_balance > 0:
+        for code, usd_sum in per_crypto_usd.items():
+            # saltar si usd_sum es 0
+            if usd_sum <= 0:
+                continue
+            chart_labels.append(code)
+            # convertir Decimal a float para JS
+            chart_values.append(float(usd_sum))
+            chart_colors.append(COLOR_MAP.get(code, "#888888"))
+    else:
+        # Si no hay saldo (o API falló), podemos mostrar datos vacíos o un placeholder
+        chart_labels = []
+        chart_values = []
+        chart_colors = []
+
+    # Preparar objeto que pasaremos al template (se serializará con json_script)
+    chart_data = {
+        "labels": chart_labels,
+        "values": chart_values,
+        "colors": chart_colors,
+    }
+
     context = {
         "wallets": wallets_with_balance,
         "total_balance": float(total_balance.quantize(Decimal("0.01"))),
         "form": form,
+        "chart_data": chart_data,  # datos para el pie chart
     }
     return render(request, "portfolio/dashboard.html", context)
 
