@@ -35,6 +35,16 @@
         <div class="text-sm text-gray-600">Hola, <strong>{{ request.user.username }}</strong></div>
         <a href="{% url 'logout' %}" class="text-sm text-red-600 hover:underline">Cerrar sesión</a>
       </div>
+      <!-- Añadir selector de divisa (colocar en la cabecera del dashboard) -->
+      <form method="get" class="inline-block mb-4">
+        <label for="fiat" class="mr-2 text-sm font-medium">Ver saldos en</label>
+        <select id="fiat" name="fiat" onchange="this.form.submit()" class="border rounded px-2 py-1">
+          <option value="USD" {% if fiat == "USD" %}selected{% endif %}>USD</option>
+          <option value="MXN" {% if fiat == "MXN" %}selected{% endif %}>MXN</option>
+          <option value="EUR" {% if fiat == "EUR" %}selected{% endif %}>EUR</option>
+        </select>
+        <!-- Mantener otros parámetros GET si los hubiera (opcional) -->
+      </form>
     </header>
 
     <!-- Mensajes -->
@@ -58,11 +68,11 @@
           {% if total_balance|floatformat:2|floatformat %}
           {% endif %}
           {% if total_balance > 0 %}
-            <p class="text-4xl font-extrabold text-green-600">${{ total_balance|floatformat:2 }}</p>
+            <p class="text-4xl font-extrabold text-green-600">{{ fiat_symbol }}{{ total_balance|floatformat:2 }}</p>
           {% elif total_balance == 0 %}
-            <p class="text-4xl font-extrabold text-gray-700">${{ total_balance|floatformat:2 }}</p>
+            <p class="text-4xl font-extrabold text-gray-700">{{ fiat_symbol }}{{ total_balance|floatformat:2 }}</p>
           {% else %}
-            <p class="text-4xl font-extrabold text-red-600">${{ total_balance|floatformat:2 }}</p>
+            <p class="text-4xl font-extrabold text-red-600">{{ fiat_symbol }}{{ total_balance|floatformat:2 }}</p>
           {% endif %}
         </div>
       </div>
@@ -137,13 +147,13 @@
                   <div>
                     {% if item.balance != "No disponible" %}
                       <div class="text-sm text-gray-500">Valor</div>
-                      <div class="text-lg font-semibold">${{ item.balance }} <span class="text-xs text-gray-500">USD</span></div>
+                      <div class="text-lg font-semibold">{{ fiat_symbol }}{{ item.balance }} <span class="text-xs text-gray-500">{{ fiat }}</span></div>
                     {% else %}
                       <div class="text-sm text-gray-500">Valor</div>
                       <div class="text-lg font-semibold text-gray-400">No disponible</div>
                     {% endif %}
                     {% if item.price_per_unit %}
-                      <div class="text-xs text-gray-400 mt-1">Precio: ${{ item.price_per_unit }} / {{ item.crypto }}</div>
+                      <div class="text-xs text-gray-400 mt-1">Precio: {{ fiat_symbol }}{{ item.price_per_unit }} / {{ item.crypto }}</div>
                     {% endif %}
                   </div>
 

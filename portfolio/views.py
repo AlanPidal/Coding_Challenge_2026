@@ -52,8 +52,17 @@ def dashboard(request):
     else:
         form = WalletForm()
 
+    # --- Selección de divisa (fiat) para mostrar saldos ---
+    # Prioridad: ?fiat= en GET -> session -> por defecto USD
+    fiat = request.GET.get("fiat") or request.session.get("fiat", "USD")
+    fiat = fiat.upper()
+    # Guardar preferencia en sesión para persistencia
+    request.session["fiat"] = fiat
+
+    # Ajustar clave de cache para incluir la divisa
+    cache_key = f"{PRICE_CACHE_KEY}:{fiat.lower()}"
     # Intentar leer precios desde cache
-    cached = cache.get(PRICE_CACHE_KEY)
+    cached = cache.get(cache_key)
     prices = {}
 
     if cached:
@@ -67,25 +76,25 @@ def dashboard(request):
         try:
             response = requests.get(
                 "https://api.coingecko.com/api/v3/simple/price",
-                params={"ids": ids, "vs_currencies": "usd"},
+                params={"ids": ids, "vs_currencies": fiat.lower()},
                 timeout=10
             )
             response.raise_for_status()
             data = response.json()
             # Convertir a Decimal y mapear a códigos (BTC, ETH,...)
             for code, cg_id in COINGECKO_IDS.items():
-                usd_val = data.get(cg_id, {}).get("usd")
+                usd_val = data.get(cg_id, {}).get(fiat.lower())
                 try:
                     prices[code] = Decimal(str(usd_val)) if usd_val is not None else None
                 except (InvalidOperation, TypeError):
                     prices[code] = None
             # Guardar en cache el diccionario de Decimals o None (UNA SOLA VEZ, fuera del loop)
-            cache.set(PRICE_CACHE_KEY, prices, PRICE_CACHE_TTL)
+            cache.set(cache_key, prices, PRICE_CACHE_TTL)
             logger.debug("Precios guardados en cache por %s segundos", PRICE_CACHE_TTL)
         except Exception as e:
             logger.exception("Error al consultar CoinGecko: %s", e)
             # Si hay cache vieja, úsala; si no, marcar precios como None
-            old = cache.get(PRICE_CACHE_KEY)
+            old = cache.get(cache_key)
             if old:
                 prices = old
                 logger.warning("CoinGecko falló: usando cache antigua")
@@ -170,11 +179,17 @@ def dashboard(request):
         "colors": chart_colors,
     }
 
+    # Mapa de símbolos por fiat
+    FIAT_SYMBOL = {"USD": "$", "MXN": "$", "EUR": "€"}
+    fiat_symbol = FIAT_SYMBOL.get(fiat, fiat + " ")
+
     context = {
         "wallets": wallets_with_balance,
         "total_balance": float(total_balance.quantize(Decimal("0.01"))),
         "form": form,
         "chart_data": chart_data,  # datos para el pie chart
+        "fiat": fiat,
+        "fiat_symbol": fiat_symbol,
     }
     return render(request, "portfolio/dashboard.html", context)
 
