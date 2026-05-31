@@ -12,7 +12,77 @@
     <!-- UserCreationForm se pasa desde register_view -->
     <form method="post">
       {% csrf_token %}
-      {{ form.as_p }}
+
+      {% if form.non_field_errors %}
+        <div class="text-red-600 text-sm mb-2">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div>
+        <label for="id_username" class="block text-sm font-medium text-gray-700">Nombre de usuario</label>
+        {{ form.username }}
+        <div class="text-xs text-gray-500 mt-1">Obligatorio. 150 caracteres o menos. Letras, dígitos y @/./+/-/_ únicamente.</div>
+        {% if form.username.errors %}
+          <div class="text-red-600 text-sm mt-1">
+            {% for err in form.username.errors %}
+              {% if err == "A user with that username already exists." %}
+                Ya existe un usuario con ese nombre de usuario.
+              {% else %}
+                {{ err }}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="mt-4">
+        <label for="id_password1" class="block text-sm font-medium text-gray-700">Contraseña</label>
+        {{ form.password1 }}
+        {% if form.password1.errors %}
+          <div class="text-red-600 text-sm mt-1">
+            {% for err in form.password1.errors %}
+              {% if err == "This password is too short. It must contain at least 8 characters." %}
+                La contraseña es demasiado corta. Debe contener al menos 8 caracteres.
+              {% elif err == "This password is too common." %}
+                Esta contraseña es de uso común.
+              {% elif err == "This password is entirely numeric." %}
+                La contraseña es totalmente numérica.
+              {% elif err == "This password is too similar to the other personal information." %}
+                Tu contraseña no puede ser demasiado similar a tu otra información personal.
+              {% else %}
+                {{ err }}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <ul class="text-xs text-gray-500 mt-2 list-disc list-inside">
+          <li>Tu contraseña no puede ser demasiado similar a tu otra información personal.</li>
+          <li>Tu contraseña debe contener al menos 8 caracteres.</li>
+          <li>Tu contraseña no puede ser una contraseña de uso común.</li>
+          <li>Tu contraseña no puede ser totalmente numérica.</li>
+        </ul>
+      </div>
+
+      <div class="mt-4">
+        <label for="id_password2" class="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+          <div class="text-red-600 text-sm mt-1">
+            {% for err in form.password2.errors %}
+              {% if err == "This password is too short. It must contain at least 8 characters." %}
+                La contraseña es demasiado corta. Debe contener al menos 8 caracteres.
+              {% elif err == "This password is too common." %}
+                Esta contraseña es de uso común.
+              {% elif err == "This password is entirely numeric." %}
+                La contraseña es totalmente numérica.
+              {% else %}
+                {{ err }}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="text-xs text-gray-500 mt-1">Introduce la misma contraseña que antes, para verificación.</div>
+      </div>
+
       <div class="mt-4">
         <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Registrarme</button>
       </div>
