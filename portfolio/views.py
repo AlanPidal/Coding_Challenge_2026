@@ -180,7 +180,7 @@ def dashboard(request):
     }
 
     # Mapa de símbolos por fiat
-    FIAT_SYMBOL = {"USD": "$", "MXN": "$", "EUR": "€"}
+    FIAT_SYMBOL = {"USD": "USD $", "MXN": "MXN $", "EUR": "€"}
     fiat_symbol = FIAT_SYMBOL.get(fiat, fiat + " ")
 
     context = {
