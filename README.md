@@ -75,3 +75,7 @@ python manage.py createsuperuser</code></pre>
   <h4>Registro de nuevos usuarios</h4>
   <img src="docs/images/register.png" alt="Registro" width="360">
 </div>
+  Deploy en https://alanpidal.pythonanywhere.com/
+<div>
+  
+</div>
