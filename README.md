@@ -61,7 +61,17 @@ python manage.py createsuperuser</code></pre>
   </li>
 </ol>
 <h2>Capturas de pantalla</h2>
-![Login](docs/images/login.png)
-![Dashboard](docs/images/dashboard.png)
-![Agregar Wallet](docs/images/wallets.png)
-![Registro](docs/images/register.png)
+
+<div style="text-align:center">
+  <h4>Login</h4>
+  <img src="docs/images/login.png" alt="Login" width="360">
+  <h4>Dashboard con gráfico de distribución</h4>
+  <img src="docs/images/dashboard.png" alt="Dashboard" width="360">
+</div>
+
+<div style="text-align = center">
+  <h4>Agregar Wallet</h4>
+  <img src="docs/images/wallets.png" alt="Agregar Wallet" width="360">
+  <h4>Registro de nuevos usuarios</h4>
+  <img src="docs/images/register.png" alt="Registro" width="360">
+</div>
