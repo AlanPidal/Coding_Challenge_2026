@@ -1,7 +1,7 @@
 asgiref==3.11.1
 certifi==2026.5.20
 charset-normalizer==3.4.7
-Django==6.0.5
+Django==4.2.20
 idna==3.17
 python-dotenv==1.2.2
 requests==2.34.2
